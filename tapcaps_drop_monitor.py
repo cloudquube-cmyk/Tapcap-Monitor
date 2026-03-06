@@ -18,22 +18,26 @@ try:
 
     if r.status_code != 200:
         print("Product not live yet:", r.status_code)
+
     else:
         data = r.json()
-
         variants = data.get("variants", [])
 
         live = False
 
         for v in variants:
-            price = str(v["price"] / 100)
 
-            print("Variant price:", price)
+            price = f'{v["price"] / 100:.2f}'
+            inventory = v.get("inventory_quantity", 0)
+            available = v.get("available", False)
 
-            if price != PLACEHOLDER_PRICE:
+            print("Price:", price, "| Inventory:", inventory, "| Available:", available)
+
+            if price != PLACEHOLDER_PRICE or inventory > 0 or available:
                 live = True
 
         if live:
+
             print("DROP DETECTED")
 
             client.calls.create(
@@ -45,8 +49,9 @@ try:
                 </Response>
                 """
             )
+
         else:
-            print("Still placeholder price")
+            print("Still placeholder")
 
 except Exception as e:
     print("Error:", e)
