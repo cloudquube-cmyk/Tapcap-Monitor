@@ -1,14 +1,13 @@
-import os
 import time
 import requests
 from twilio.rest import Client
 
 URL = "https://tapcaps.com/products/xxxxxx-mystery-box"
 
-ACCOUNT_SID = os.environ["ACCOUNT_SID"]
-AUTH_TOKEN = os.environ["AUTH_TOKEN"]
-TWILIO_PHONE = os.environ["TWILIO_PHONE"]
-YOUR_PHONE = os.environ["YOUR_PHONE"]
+ACCOUNT_SID = "PUT_TWILIO_SID_HERE"
+AUTH_TOKEN = "PUT_TWILIO_TOKEN_HERE"
+TWILIO_PHONE = "+1YOUR_TWILIO_NUMBER"
+YOUR_PHONE = "+1YOUR_PHONE"
 
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
