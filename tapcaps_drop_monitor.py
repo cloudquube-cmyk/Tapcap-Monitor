@@ -1,23 +1,39 @@
-import time
+import os
 import requests
 from twilio.rest import Client
 
-URL = "https://tapcaps.com/products/xxxxxx-mystery-box"
+PRODUCT_URL = "https://tapcaps.com/products/xxxxxx-mystery-box.js"
 
-ACCOUNT_SID = "PUT_TWILIO_SID_HERE"
-AUTH_TOKEN = "PUT_TWILIO_TOKEN_HERE"
-TWILIO_PHONE = "+1YOUR_TWILIO_NUMBER"
-YOUR_PHONE = "+1YOUR_PHONE"
+PLACEHOLDER_PRICE = "1111.99"
+
+ACCOUNT_SID = os.environ["ACCOUNT_SID"]
+AUTH_TOKEN = os.environ["AUTH_TOKEN"]
+TWILIO_PHONE = os.environ["TWILIO_PHONE"]
+YOUR_PHONE = os.environ["YOUR_PHONE"]
 
 client = Client(ACCOUNT_SID, AUTH_TOKEN)
 
-called = False
+try:
+    r = requests.get(PRODUCT_URL, timeout=10)
 
-while True:
-    try:
-        r = requests.get(URL)
+    if r.status_code != 200:
+        print("Product not live yet:", r.status_code)
+    else:
+        data = r.json()
 
-        if r.status_code == 200 and not called:
+        variants = data.get("variants", [])
+
+        live = False
+
+        for v in variants:
+            price = str(v["price"] / 100)
+
+            print("Variant price:", price)
+
+            if price != PLACEHOLDER_PRICE:
+                live = True
+
+        if live:
             print("DROP DETECTED")
 
             client.calls.create(
@@ -25,17 +41,12 @@ while True:
                 from_=TWILIO_PHONE,
                 twiml="""
                 <Response>
-                <Say>The TapCaps drop is live. Check the site now.</Say>
+                    <Say>The TapCaps drop is live. Check the site now.</Say>
                 </Response>
                 """
             )
-
-            called = True
-
         else:
-            print("Still not live:", r.status_code)
+            print("Still placeholder price")
 
-    except Exception as e:
-        print("Error:", e)
-
-    time.sleep(3)
+except Exception as e:
+    print("Error:", e)
